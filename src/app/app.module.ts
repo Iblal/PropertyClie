@@ -17,7 +17,7 @@ import { environment } from 'src/environments/environment';
 import { TranslateModule, TranslateLoader } from '@ngx-translate/core';
 import { TranslateHttpLoader } from '@ngx-translate/http-loader'; 
 export function HttpLoaderFactory(httpClient: HttpClient) { 
-  return new TranslateHttpLoader(httpClient, environment.url +'/assets/i18n/', '.json');
+  return new TranslateHttpLoader(httpClient, environment.jsonURL +'/assets/i18n/', '.json');
 }
 
 import { OverlayContainer } from '@angular/cdk/overlay';

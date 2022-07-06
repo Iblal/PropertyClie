@@ -30,7 +30,7 @@ export class AppService {
     []  // locations
   )
  
-  public url = environment.url + '/assets/data/'; 
+  public url = environment.jsonURL + '/assets/data/'; 
   public apiKey = 'AIzaSyAO7Mg2Cs1qzo_3jkKkZAKY6jtwIlm41-I';
   
   constructor(public http:HttpClient, 
