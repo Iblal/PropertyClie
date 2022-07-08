@@ -1,29 +1,53 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { AuthResponseDto } from 'src/app/Dtos/AuthResponseDto';
+import { UserForAuthenticationDto } from 'src/app/Dtos/UserForAuthenticationDTO';
+import { Router, ActivatedRoute } from '@angular/router';
+import { AuthenticationService } from './../../shared/services/authentication.service';
 import { Component, OnInit } from '@angular/core';
-import { UntypedFormGroup, UntypedFormBuilder, Validators} from '@angular/forms';
-import { Router } from '@angular/router'; 
-
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
 export class LoginComponent implements OnInit {
-  public loginForm: UntypedFormGroup;
-  public hide = true;
-  constructor(public fb: UntypedFormBuilder, public router:Router) { }
-
-  ngOnInit() {
-    this.loginForm = this.fb.group({
-      username: [null, Validators.compose([Validators.required, Validators.minLength(6)])],
-      password: [null, Validators.compose([Validators.required, Validators.minLength(6)])],
-      rememberMe: false
-    });
+  private returnUrl: string;
+  
+  loginForm: FormGroup;
+  errorMessage: string = '';
+  showError: boolean;
+  constructor(private authService: AuthenticationService, private router: Router, private route: ActivatedRoute) { }
+  
+  ngOnInit(): void {
+    this.loginForm = new FormGroup({
+      username: new FormControl("", [Validators.required]),
+      password: new FormControl("", [Validators.required])
+    })
+    this.returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/';
   }
-
-  public onLoginFormSubmit(values:Object):void {
-    if (this.loginForm.valid) {
-      this.router.navigate(['/']);
+  validateControl = (controlName: string) => {
+    return this.loginForm.get(controlName).invalid && this.loginForm.get(controlName).touched
+  }
+  hasError = (controlName: string, errorName: string) => {
+    return this.loginForm.get(controlName).hasError(errorName)
+  }
+  
+  loginUser = (loginFormValue) => {
+    this.showError = false;
+    const login = {... loginFormValue };
+    const userForAuth: UserForAuthenticationDto = {
+      email: login.username,
+      password: login.password
     }
+    this.authService.loginUser('api/accounts/login', userForAuth)
+    .subscribe({
+      next: (res:AuthResponseDto) => {
+       localStorage.setItem("token", res.token);
+       this.router.navigate([this.returnUrl]);
+    },
+    error: (err: HttpErrorResponse) => {
+      this.errorMessage = err.message;
+      this.showError = true;
+    }})
   }
-
 }
